@@ -26,6 +26,24 @@ defmodule ExBanking.Core do
     |> merge_wallet_into_wallets(account, currency)
   end
 
+  @spec decrease_account_wallet(
+          account :: Account.t(),
+          amount :: Decimal.t(),
+          currency :: String.t()
+        ) :: Account.t() | :not_enough_money
+  def decrease_account_wallet(account, amount, currency) do
+    account
+    |> find_or_create_wallet(currency)
+    |> Wallet.decrease_wallet_balance(amount)
+    |> case do
+      :not_enough_money ->
+        :not_enough_money
+
+      decreased_wallet ->
+        merge_wallet_into_wallets(decreased_wallet, account, currency)
+    end
+  end
+
   @spec format_balance_from_wallet(account :: Account.t(), currency :: String.t()) :: number()
   def format_balance_from_wallet(account, currency) do
     account

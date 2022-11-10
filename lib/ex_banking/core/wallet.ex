@@ -32,6 +32,17 @@ defmodule ExBanking.Core.Wallet do
   def increase_wallet_balance(wallet, amount),
     do: update_in(wallet[:balance], &Decimal.add(&1, amount))
 
+  @spec decrease_wallet_balance(wallet :: t(), amount :: D.t()) :: t() | :not_enough_money
+  def decrease_wallet_balance(wallet, amount) do
+    sub = D.sub(wallet.balance, amount)
+
+    if D.lt?(sub, Decimal.new(0)) do
+      :not_enough_money
+    else
+      update_in(wallet[:balance], fn _ -> sub end)
+    end
+  end
+
   @spec format_balance(wallet :: t()) :: float()
   def format_balance(%__MODULE__{balance: balance}) do
     balance
