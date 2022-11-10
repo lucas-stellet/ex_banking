@@ -44,14 +44,27 @@ defmodule ExBanking.Core do
     end
   end
 
-  @spec format_balance_from_wallet(account :: Account.t(), currency :: String.t()) :: number()
+  @spec format_balance_from_wallet(account :: Account.t(), currency :: String.t()) ::
+          number() | :no_wallet_with_given_currency
   def format_balance_from_wallet(account, currency) do
     account
-    |> find_or_create_wallet(currency)
-    |> Wallet.format_balance()
+    |> find_wallet(currency)
+    |> case do
+      nil ->
+        :no_wallet_with_given_currency
+
+      wallet ->
+        Wallet.format_balance(wallet)
+    end
   end
 
-  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: nil}]}, currency) do
+  defp find_wallet(%Account{wallets: [%Wallet{currency: "no_currency"}]}, _currency),
+    do: nil
+
+  defp find_wallet(%Account{wallets: wallets}, currency),
+    do: Enum.find(wallets, &(&1.currency == currency))
+
+  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: "no_currency"}]}, currency) do
     Wallet.new(Decimal.new(0), currency)
   end
 
