@@ -21,6 +21,12 @@ defmodule ExBanking.Services.AccountServer do
     GenServer.call(via(username), {:deposit, amount, currency})
   end
 
+  @spec withdraw(username :: String.t(), amount :: Decimal.t(), currency :: String.t()) ::
+          term()
+  def withdraw(username, amount, currency) do
+    GenServer.call(via(username), {:withdraw, amount, currency})
+  end
+
   defp via(username) do
     {:via, Registry, {AccountRegistry, username}}
   end
@@ -38,5 +44,18 @@ defmodule ExBanking.Services.AccountServer do
     updated_balance = Core.format_balance_from_wallet(updated_account, currency)
 
     {:reply, updated_balance, updated_account}
+  end
+
+  @impl true
+  def handle_call({:withdraw, amount, currency}, _from, account) do
+    case Core.decrease_account_wallet(account, amount, currency) do
+      :not_enough_money = error ->
+        {:reply, error, account}
+
+      updated_account ->
+        updated_balance = Core.format_balance_from_wallet(updated_account, currency)
+
+        {:reply, updated_balance, updated_account}
+    end
   end
 end
