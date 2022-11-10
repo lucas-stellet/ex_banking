@@ -15,7 +15,7 @@ defmodule ExBanking.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :crypto],
       mod: {ExBanking.Application, []}
     ]
   end
@@ -24,7 +24,8 @@ defmodule ExBanking.MixProject do
     [
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:decimal, "~> 2.0"}
+      {:decimal, "~> 2.0"},
+      {:uuid, "~> 1.1"}
     ]
   end
 end
