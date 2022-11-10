@@ -107,6 +107,48 @@ defmodule ExBankingTest do
     end
   end
 
+  describe "send" do
+    test "should returns {:ok, 0.0, 10.0} when sender send money to receiver successfully" do
+      [sender, receiver] = create_sender_and_receiver()
+
+      {:ok, 10.0} = ExBanking.deposit(sender, 10, "USD")
+
+      assert {:ok, 0.0, 10.0} = ExBanking.send(sender, receiver, 10, "USD")
+    end
+
+    test "should returns {:error, not_enough_money} when sender tries to send money to receiver but he does not has enough money" do
+      [sender, receiver] = create_sender_and_receiver()
+
+      {:ok, 5.0} = ExBanking.deposit(sender, 5, "USD")
+
+      assert {:error, :not_enough_money} = ExBanking.send(sender, receiver, 10, "USD")
+    end
+
+    test "should returns {:error, :sender_does_not_exist} when the sender user does not exist" do
+      receiver = create_user()
+
+      assert {:error, :sender_does_not_exist} = ExBanking.send("uswe", receiver, 10, "USD")
+    end
+
+    test "should returns {:error, :receiver_does_not_exist} when the receiver user does not exist" do
+      sender = create_user()
+
+      assert {:error, :receiver_does_not_exist} = ExBanking.send(sender, "user", 10, "USD")
+    end
+
+    test "should returns {:error, :wrong_arguments} when the given amount is not a number" do
+      [sender, receiver] = create_sender_and_receiver()
+
+      assert {:error, :wrong_arguments} = ExBanking.send(sender, receiver, "ten", "USD")
+    end
+
+    test "should returns {:error, :wrong_arguments} when the given currency is not a string" do
+      [sender, receiver] = create_sender_and_receiver()
+
+      assert {:error, :wrong_arguments} = ExBanking.send(sender, receiver, 10, :dollars)
+    end
+  end
+
   defp create_user do
     user = Faker.Internet.user_name()
 
@@ -114,4 +156,6 @@ defmodule ExBankingTest do
 
     user
   end
+
+  defp create_sender_and_receiver, do: [create_user(), create_user()]
 end
