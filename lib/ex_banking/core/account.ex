@@ -1,11 +1,13 @@
 defmodule ExBanking.Core.Account do
+  @moduledoc false
+
   alias ExBanking.Core.Wallet
 
   defstruct [:username, :wallets]
 
   @type t :: %__MODULE__{
           username: String.t(),
-          wallets: list(Wallet.t()) | Wallet.t()
+          wallets: list(Wallet.t())
         }
 
   @spec new(username :: String.t()) :: t() | :wrong_arguments
@@ -13,7 +15,7 @@ defmodule ExBanking.Core.Account do
     if is_valid_username?(username) do
       %__MODULE__{
         username: username,
-        wallets: Wallet.new()
+        wallets: [Wallet.new()]
       }
     else
       :wrong_arguments

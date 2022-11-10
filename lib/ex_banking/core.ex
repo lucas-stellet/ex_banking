@@ -13,4 +13,43 @@ defmodule ExBanking.Core do
         {:ok, account}
     end
   end
+
+  def increase_account_wallet(account, amount, currency) do
+    account
+    |> find_or_create_wallet(amount, currency)
+    |> Wallet.increase_wallet_balance(amount)
+    |> merge_wallet_into_wallets(account, currency)
+  end
+
+  def format_balance_from_wallet(account, currency) do
+    account
+    |> find_wallet(currency)
+    |> Wallet.format_balance()
+  end
+
+  defp find_wallet(%Account{wallets: wallets}, currency),
+    do: Enum.find(wallets, &(&1.currency == currency))
+
+  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: nil}]}, amount, currency) do
+    Wallet.new(amount, currency)
+  end
+
+  defp find_or_create_wallet(%Account{wallets: wallets}, _amount, currency),
+    do: Enum.find(wallets, &(&1.currency == currency))
+
+  defp merge_wallet_into_wallets(
+         new_wallet,
+         %Account{wallets: current_wallets} = account,
+         currency
+       ) do
+    updated_wallets = [new_wallet | remove_wallet(current_wallets, currency)]
+
+    %Account{
+      account
+      | wallets: updated_wallets
+    }
+  end
+
+  defp remove_wallet(wallets, currency),
+    do: Enum.reject(wallets, &(&1.currency == currency))
 end
