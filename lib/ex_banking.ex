@@ -31,4 +31,33 @@ defmodule ExBanking do
         error
     end
   end
+
+  @spec withdraw(user :: String.t(), amount :: number, currency :: String.t()) ::
+          {:ok, new_balance :: number}
+          | {:error,
+             :wrong_arguments
+             | :user_does_not_exist
+             | :not_enough_money
+             | :too_many_requests_to_user}
+
+  def withdraw(user, amount, currency) do
+    operation = Operations.new_withdraw(amount, currency)
+
+    with :ok <- Services.check_account_service_creation(user),
+         {:ok, withdraw_operation} <- operation,
+         :ok <- Services.start_operation(user, withdraw_operation),
+         {:ok, new_balance} <- Services.update_balance_account(user, withdraw_operation) do
+      Services.finish_operation(user, withdraw_operation)
+      {:ok, new_balance}
+    else
+      {:error, :not_enough_money} = error ->
+        {:ok, withdraw_operation} = operation
+        Services.finish_operation(user, withdraw_operation)
+
+        error
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
 end
