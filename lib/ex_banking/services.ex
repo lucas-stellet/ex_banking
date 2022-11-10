@@ -73,7 +73,7 @@ defmodule ExBanking.Services do
         {:error, :not_enough_money}
 
       updated_account ->
-        updated_account
+        {:ok, updated_account}
     end
   end
 

@@ -1,11 +1,13 @@
 defmodule ExBankingTest do
   @moduledoc false
 
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   describe "create_user" do
     test "should returns :ok when the user is created" do
-      assert :ok = ExBanking.create_user("thor")
+      user = Faker.Internet.user_name()
+
+      assert :ok = ExBanking.create_user(user)
     end
 
     test "should returns {:error, :wrong_arguments} when the given param not is a string" do
@@ -13,7 +15,7 @@ defmodule ExBankingTest do
     end
 
     test "should returns {:error, :user_already_exists} when the user already was created" do
-      user = "thor"
+      user = Faker.Internet.user_name()
 
       :ok = ExBanking.create_user(user)
 
@@ -105,7 +107,9 @@ defmodule ExBankingTest do
     end
   end
 
-  defp create_user(user \\ "thor") do
+  defp create_user do
+    user = Faker.Internet.user_name()
+
     :ok = ExBanking.create_user(user)
 
     user
