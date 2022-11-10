@@ -31,4 +31,21 @@ defmodule ExBanking.Services do
         true
     end
   end
+  @spec start_operation(username :: String.t(), operation :: Operations.t()) ::
+          :ok | {:error, :too_many_requests_to_user}
+  def start_operation(username, operation) do
+    case AccountOperations.start_operation(username, operation) do
+      :too_many_requests_to_user ->
+        {:error, :too_many_requests_to_user}
+
+      :ok ->
+        :ok
+    end
+  end
+
+  @spec finish_operation(username :: String.t(), operation :: Operations.t()) ::
+          :ok
+  def finish_operation(username, operation) do
+    AccountOperations.finish_operation(username, operation)
+  end
 end
