@@ -14,6 +14,11 @@ defmodule ExBanking.Core do
     end
   end
 
+  @spec increase_account_wallet(
+          account :: Account.t(),
+          amount :: Decimal.t(),
+          currency :: String.t()
+        ) :: Account.t()
   def increase_account_wallet(account, amount, currency) do
     account
     |> find_or_create_wallet(amount, currency)
@@ -21,6 +26,7 @@ defmodule ExBanking.Core do
     |> merge_wallet_into_wallets(account, currency)
   end
 
+  @spec format_balance_from_wallet(account :: Account.t(), currency :: String.t()) :: number()
   def format_balance_from_wallet(account, currency) do
     account
     |> find_wallet(currency)

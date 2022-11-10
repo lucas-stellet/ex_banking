@@ -7,6 +7,7 @@ defmodule ExBanking.Services.AccountOperations do
 
   defstruct running: [], finished: []
 
+  @spec start_link(username :: String.t()) :: GenServer.on_start()
   def start_link(username) do
     Agent.start_link(fn -> %__MODULE__{} end, name: via(username))
   end
@@ -45,6 +46,7 @@ defmodule ExBanking.Services.AccountOperations do
     Agent.get(via(username), &Enum.count(&1.running))
   end
 
+  @spec via(username :: String.t()) :: tuple()
   def via(username) do
     key = username <> "_operations"
 

@@ -3,12 +3,15 @@ defmodule ExBanking.Services.AccountSupervisor do
 
   use Supervisor, restart: :temporary
 
+  alias ExBanking.Core.Account
   alias ExBanking.Services.{AccountOperations, AccountServer}
 
+  @spec start_link(account :: Account.t()) :: GenServer.on_start()
   def start_link(account) do
     Supervisor.start_link(__MODULE__, account)
   end
 
+  @impl true
   def init(account) do
     children = [
       {AccountOperations, account.username},

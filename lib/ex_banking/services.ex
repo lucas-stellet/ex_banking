@@ -61,6 +61,8 @@ defmodule ExBanking.Services do
     AccountOperations.finish_operation(username, operation)
   end
 
+  @spec update_balance_account(username :: String.t(), operation :: Operations.t()) ::
+          term()
   def update_balance_account(username, %Operations.Deposit{amount: amount, currency: currency}) do
     AccountServer.deposit(username, amount, currency)
   end
