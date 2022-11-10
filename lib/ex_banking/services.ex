@@ -66,4 +66,14 @@ defmodule ExBanking.Services do
   def update_balance_account(username, %Operations.Deposit{amount: amount, currency: currency}) do
     AccountServer.deposit(username, amount, currency)
   end
+
+  def update_balance_account(username, %Operations.Withdraw{amount: amount, currency: currency}) do
+    case AccountServer.withdraw(username, amount, currency) do
+      :not_enough_money ->
+        {:error, :not_enough_money}
+
+      updated_account ->
+        updated_account
+    end
+  end
 end
