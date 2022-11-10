@@ -21,7 +21,7 @@ defmodule ExBanking.Core do
         ) :: Account.t()
   def increase_account_wallet(account, amount, currency) do
     account
-    |> find_or_create_wallet(amount, currency)
+    |> find_or_create_wallet(currency)
     |> Wallet.increase_wallet_balance(amount)
     |> merge_wallet_into_wallets(account, currency)
   end
@@ -29,18 +29,15 @@ defmodule ExBanking.Core do
   @spec format_balance_from_wallet(account :: Account.t(), currency :: String.t()) :: number()
   def format_balance_from_wallet(account, currency) do
     account
-    |> find_wallet(currency)
+    |> find_or_create_wallet(currency)
     |> Wallet.format_balance()
   end
 
-  defp find_wallet(%Account{wallets: wallets}, currency),
-    do: Enum.find(wallets, &(&1.currency == currency))
-
-  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: nil}]}, amount, currency) do
-    Wallet.new(amount, currency)
+  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: nil}]}, currency) do
+    Wallet.new(Decimal.new(0), currency)
   end
 
-  defp find_or_create_wallet(%Account{wallets: wallets}, _amount, currency),
+  defp find_or_create_wallet(%Account{wallets: wallets}, currency),
     do: Enum.find(wallets, &(&1.currency == currency))
 
   defp merge_wallet_into_wallets(
