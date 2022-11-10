@@ -20,10 +20,16 @@ defmodule ExBanking.Core do
           currency :: String.t()
         ) :: Account.t()
   def increase_account_wallet(account, amount, currency) do
-    account
-    |> find_or_create_wallet(currency)
-    |> Wallet.increase_wallet_balance(amount)
-    |> merge_wallet_into_wallets(account, currency)
+    case find_wallet(account, currency) do
+      %Wallet{} = wallet ->
+        wallet
+        |> Wallet.increase_wallet_balance(amount)
+        |> merge_wallet_into_wallets(account, currency)
+
+      nil ->
+        Wallet.new(amount, currency)
+        |> merge_wallet_into_wallets(account, currency)
+    end
   end
 
   @spec decrease_account_wallet(
@@ -32,15 +38,12 @@ defmodule ExBanking.Core do
           currency :: String.t()
         ) :: Account.t() | :not_enough_money
   def decrease_account_wallet(account, amount, currency) do
-    account
-    |> find_or_create_wallet(currency)
-    |> Wallet.decrease_wallet_balance(amount)
-    |> case do
-      :not_enough_money ->
+    with %Wallet{} = wallet <- find_wallet(account, currency),
+         %Wallet{} = decreased_wallet <- Wallet.decrease_wallet_balance(wallet, amount) do
+      merge_wallet_into_wallets(decreased_wallet, account, currency)
+    else
+      _ ->
         :not_enough_money
-
-      decreased_wallet ->
-        merge_wallet_into_wallets(decreased_wallet, account, currency)
     end
   end
 
@@ -62,13 +65,6 @@ defmodule ExBanking.Core do
     do: nil
 
   defp find_wallet(%Account{wallets: wallets}, currency),
-    do: Enum.find(wallets, &(&1.currency == currency))
-
-  defp find_or_create_wallet(%Account{wallets: [%Wallet{currency: "no_currency"}]}, currency) do
-    Wallet.new(Decimal.new(0), currency)
-  end
-
-  defp find_or_create_wallet(%Account{wallets: wallets}, currency),
     do: Enum.find(wallets, &(&1.currency == currency))
 
   defp merge_wallet_into_wallets(
