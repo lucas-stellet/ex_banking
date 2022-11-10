@@ -2,7 +2,8 @@ defmodule ExBanking.Services do
   @moduledoc false
 
   alias ExBanking.Core.Account
-  alias ExBanking.Services.{AccountCreator, AccountRegistry}
+  alias ExBanking.Operations
+  alias ExBanking.Services.{AccountCreator, AccountOperations, AccountRegistry, AccountServer}
 
   require Logger
 
@@ -22,8 +23,18 @@ defmodule ExBanking.Services do
     end
   end
 
-  defp account_service_already_started?(user) do
-    case Registry.lookup(AccountRegistry, user) do
+  @spec check_account_service_creation(username :: String.t()) ::
+          :ok | {:error, :user_does_not_exist}
+  def check_account_service_creation(username) do
+    if account_service_already_started?(username) do
+      :ok
+    else
+      {:error, :user_does_not_exist}
+    end
+  end
+
+  defp account_service_already_started?(username) do
+    case Registry.lookup(AccountRegistry, username) do
       [] ->
         false
 
@@ -31,6 +42,7 @@ defmodule ExBanking.Services do
         true
     end
   end
+
   @spec start_operation(username :: String.t(), operation :: Operations.t()) ::
           :ok | {:error, :too_many_requests_to_user}
   def start_operation(username, operation) do
@@ -47,5 +59,9 @@ defmodule ExBanking.Services do
           :ok
   def finish_operation(username, operation) do
     AccountOperations.finish_operation(username, operation)
+  end
+
+  def update_balance_account(username, %Operations.Deposit{amount: amount, currency: currency}) do
+    AccountServer.deposit(username, amount, currency)
   end
 end
