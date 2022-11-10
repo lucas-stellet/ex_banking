@@ -11,7 +11,7 @@ defmodule ExBanking.Services.AccountSupervisor do
 
   def init(account) do
     children = [
-      {AccountOperations, account},
+      {AccountOperations, account.username},
       {AccountServer, account}
     ]
 
