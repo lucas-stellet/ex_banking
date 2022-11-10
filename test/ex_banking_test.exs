@@ -85,6 +85,26 @@ defmodule ExBankingTest do
     end
   end
 
+  describe "get_balance" do
+    test "should returns {:ok, 10.0} when return the balance correctly" do
+      user = create_user()
+
+      assert {:ok, 10.0} = ExBanking.deposit(user, 10, "USD")
+
+      assert {:ok, 10.0} = ExBanking.get_balance(user, "USD")
+    end
+
+    test "should returns {:error, :wrong_arguments} when there is no wallet from given currency" do
+      user = create_user()
+
+      assert {:error, :wrong_arguments} = ExBanking.get_balance(user, "USD")
+    end
+
+    test "should returns {:error, :user_does_not_exist} when the given user does not exist" do
+      assert {:error, :user_does_not_exist} = ExBanking.get_balance("user", "USD")
+    end
+  end
+
   defp create_user(user \\ "thor") do
     :ok = ExBanking.create_user(user)
 

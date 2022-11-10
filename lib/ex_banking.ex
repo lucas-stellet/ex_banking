@@ -60,4 +60,29 @@ defmodule ExBanking do
         error
     end
   end
+
+  @spec get_balance(user :: String.t(), currency :: String.t()) ::
+          {:ok, balance :: number}
+          | {:error, :wrong_arguments | :user_does_not_exist | :too_many_requests_to_user}
+  def get_balance(user, currency) do
+    operation = Operations.new_balance(user, currency)
+
+    with :ok <- Services.check_account_service_creation(user),
+         {:ok, balance_operation} <- operation,
+         :ok <- Services.start_operation(user, balance_operation),
+         {:ok, balance} <- Services.get_balance_from_account(balance_operation) do
+      Services.finish_operation(user, balance_operation)
+      {:ok, balance}
+    else
+      {:error, :no_wallet_with_given_currency} ->
+        {:ok, balance_operation} = operation
+
+        Services.finish_operation(user, balance_operation)
+
+        {:error, :wrong_arguments}
+
+      {:error, _reason} = error ->
+        error
+    end
+  end
 end
