@@ -76,4 +76,16 @@ defmodule ExBanking.Services do
         updated_account
     end
   end
+
+  @spec get_balance_from_account(operation :: Operations.t()) ::
+          {:error, :no_wallet_with_given_currency} | {:ok, number()}
+  def get_balance_from_account(%Operations.Balance{username: username, currency: currency}) do
+    case AccountServer.get_balance_from_wallet(username, currency) do
+      :no_wallet_with_given_currency ->
+        {:error, :no_wallet_with_given_currency}
+
+      balance ->
+        {:ok, balance}
+    end
+  end
 end

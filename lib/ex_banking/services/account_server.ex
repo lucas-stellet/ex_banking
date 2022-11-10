@@ -27,6 +27,12 @@ defmodule ExBanking.Services.AccountServer do
     GenServer.call(via(username), {:withdraw, amount, currency})
   end
 
+  @spec get_balance_from_wallet(username :: String.t(), currency :: String.t()) ::
+          number() | :no_wallet_with_given_currency
+  def get_balance_from_wallet(username, currency) do
+    GenServer.call(via(username), {:balance, currency})
+  end
+
   defp via(username) do
     {:via, Registry, {AccountRegistry, username}}
   end
@@ -57,5 +63,10 @@ defmodule ExBanking.Services.AccountServer do
 
         {:reply, updated_balance, updated_account}
     end
+  end
+
+  @impl true
+  def handle_call({:balance, currency}, _from, account) do
+    {:reply, Core.format_balance_from_wallet(account, currency), account}
   end
 end
