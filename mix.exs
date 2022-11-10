@@ -27,7 +27,8 @@ defmodule ExBanking.MixProject do
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:decimal, "~> 2.0"},
       {:uuid, "~> 1.1"},
-      {:accessible, "~> 0.3.0"}
+      {:accessible, "~> 0.3.0"},
+      {:faker, "~> 0.17", only: :test}
     ]
   end
 
