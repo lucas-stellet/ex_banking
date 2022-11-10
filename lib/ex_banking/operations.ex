@@ -1,9 +1,9 @@
 defmodule ExBanking.Operations do
   @moduledoc false
 
-  alias ExBanking.Operations.{Balance, Deposit, Withdraw}
+  alias ExBanking.Operations.{Balance, Deposit, Transfer, Withdraw}
 
-  @type t :: Deposit.t() | Withdraw.t() | Balance.t()
+  @type t :: Deposit.t() | Withdraw.t() | Balance.t() | Transfer.t()
   @spec new_deposit(amount :: number(), currency :: String.t()) ::
           {:ok, Deposit.t()} | {:error, :wrong_arguments}
   def new_deposit(amount, currency) do
@@ -25,6 +25,18 @@ defmodule ExBanking.Operations do
 
       withdraw_operation ->
         {:ok, withdraw_operation}
+    end
+  end
+
+  @spec new_transfer(type :: atom(), amount :: number(), currency :: String.t()) ::
+          {:ok, Transfer.t()} | {:error, :wrong_arguments}
+  def new_transfer(type, amount, currency) do
+    case Transfer.new(type, amount, currency) do
+      :wrong_arguments ->
+        {:error, :wrong_arguments}
+
+      transfer_operation ->
+        {:ok, transfer_operation}
     end
   end
 
