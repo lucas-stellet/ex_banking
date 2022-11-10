@@ -72,12 +72,12 @@ defmodule ExBanking.Services do
       :not_enough_money ->
         {:error, :not_enough_money}
 
-      updated_account ->
-        {:ok, updated_account}
+      updated_balance ->
+        {:ok, updated_balance}
     end
   end
 
-  @spec get_balance_from_account(operation :: Operations.t()) ::
+  @spec get_balance_from_account(operation :: Operations.Balance.t()) ::
           {:error, :no_wallet_with_given_currency} | {:ok, number()}
   def get_balance_from_account(%Operations.Balance{username: username, currency: currency}) do
     case AccountServer.get_balance_from_wallet(username, currency) do
@@ -87,5 +87,27 @@ defmodule ExBanking.Services do
       balance ->
         {:ok, balance}
     end
+  end
+
+  @spec send_money(username :: String.t(), operation :: Operations.Transfer.t()) ::
+          {:error, :no_wallet_with_given_currency} | {:ok, number()}
+  def send_money(username, %Operations.Transfer{type: :sender, amount: amount, currency: currency}) do
+    case AccountServer.withdraw(username, amount, currency) do
+      :not_enough_money ->
+        {:error, :not_enough_money}
+
+      updated_balance ->
+        {:ok, updated_balance}
+    end
+  end
+
+  @spec receive_money(username :: String.t(), operation :: Operations.Transfer.t()) ::
+          {:error, :no_wallet_with_given_currency} | {:ok, number()}
+  def receive_money(username, %Operations.Transfer{
+        type: :receiver,
+        amount: amount,
+        currency: currency
+      }) do
+    {:ok, AccountServer.deposit(username, amount, currency)}
   end
 end
