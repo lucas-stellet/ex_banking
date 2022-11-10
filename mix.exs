@@ -9,6 +9,7 @@ defmodule ExBanking.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -27,6 +28,12 @@ defmodule ExBanking.MixProject do
       {:decimal, "~> 2.0"},
       {:uuid, "~> 1.1"},
       {:accessible, "~> 0.3.0"}
+    ]
+  end
+
+  defp aliases do
+    [
+      "code.quality": ["credo", "dialyzer"]
     ]
   end
 end
