@@ -21,5 +21,5 @@ defmodule ExBanking.Core.Account do
   end
 
   defp is_valid_username?(username),
-    do: is_binary(username) && true
+    do: is_binary(username) and true
 end
