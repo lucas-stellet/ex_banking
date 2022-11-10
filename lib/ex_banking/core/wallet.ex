@@ -9,14 +9,14 @@ defmodule ExBanking.Core.Wallet do
 
   @type t :: %__MODULE__{
           balance: D.t(),
-          currency: String.t() | nil
+          currency: String.t()
         }
 
   @spec new() :: t()
   def new do
     %__MODULE__{
       balance: D.new(0),
-      currency: nil
+      currency: "no_currency"
     }
   end
 
