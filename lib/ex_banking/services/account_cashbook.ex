@@ -1,17 +1,14 @@
 defmodule ExBanking.Services.AccountCashbook do
   @moduledoc false
 
-  alias ExBanking.Operations
-
   @cache_name :account_cashbook
 
   @type t :: %__MODULE__{
           balance: Decimal.t(),
-          last_updated_at: DateTime.t(),
-          operations: [Operations.t()] | []
+          last_updated_at: DateTime.t()
         }
 
-  defstruct [:balance, :last_updated_at, :operations]
+  defstruct [:balance, :last_updated_at]
 
   @spec register_last_balance(username :: String.t(), balance :: Decimal.t()) :: :ok
   def register_last_balance(username, balance) do
@@ -23,21 +20,21 @@ defmodule ExBanking.Services.AccountCashbook do
     :ok
   end
 
-  @spec update_account_operations(username :: String.t(), operation :: Operations.t()) :: :ok
-  def update_account_operations(username, operation) do
-    Cachex.get_and_update(@cache_name, username, fn
-      nil -> {:commit, new(0, operation)}
-      registry -> {:commit, update_operations(registry, operation)}
-    end)
+  @spec get_last_balance(username :: String.t()) :: Decimal.t() | nil
+  def get_last_balance(username) do
+    case Cachex.get(@cache_name, username) do
+      {:ok, nil} ->
+        nil
 
-    :ok
+      {:ok, balance} ->
+        balance
+    end
   end
 
-  defp new(balance, operations \\ []) do
+  defp new(balance) do
     %__MODULE__{
       balance: balance,
-      last_updated_at: DateTime.utc_now(),
-      operations: operations
+      last_updated_at: DateTime.utc_now()
     }
   end
 
@@ -45,14 +42,6 @@ defmodule ExBanking.Services.AccountCashbook do
     %__MODULE__{
       cashbook_registry
       | balance: new_balance,
-        last_updated_at: DateTime.utc_now()
-    }
-  end
-
-  defp update_operations(cashbook_registry, new_operation) do
-    %__MODULE__{
-      cashbook_registry
-      | operations: [new_operation | cashbook_registry.operations],
         last_updated_at: DateTime.utc_now()
     }
   end
