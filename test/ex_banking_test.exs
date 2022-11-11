@@ -124,6 +124,12 @@ defmodule ExBankingTest do
       assert {:error, :not_enough_money} = ExBanking.send(sender, receiver, 10, "USD")
     end
 
+    test "should returns {:error, not_enough_money} when sender tries to send money to receiver from a nonexistent wallet " do
+      [sender, receiver] = create_sender_and_receiver()
+
+      assert {:error, :not_enough_money} = ExBanking.send(sender, receiver, 10, "USD")
+    end
+
     test "should returns {:error, :sender_does_not_exist} when the sender user does not exist" do
       receiver = create_user()
 
