@@ -28,7 +28,8 @@ defmodule ExBanking.MixProject do
       {:decimal, "~> 2.0"},
       {:uuid, "~> 1.1"},
       {:accessible, "~> 0.3.0"},
-      {:faker, "~> 0.17", only: :test}
+      {:faker, "~> 0.17", only: :test},
+      {:cachex, "~> 3.4"}
     ]
   end
 
