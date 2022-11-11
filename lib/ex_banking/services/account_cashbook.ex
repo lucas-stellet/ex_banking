@@ -12,7 +12,7 @@ defmodule ExBanking.Services.AccountCashbook do
 
   defstruct [:wallets, :last_updated_at]
 
-  @spec register_last_wallets(username :: String.t(), wallets :: Decimal.t()) :: :ok
+  @spec register_last_wallets(username :: String.t(), wallets :: list(Wallet.t())) :: :ok
   def register_last_wallets(username, wallets) do
     Cachex.get_and_update!(@cache_name, username, fn
       nil -> {:commit, new(wallets)}
@@ -28,8 +28,8 @@ defmodule ExBanking.Services.AccountCashbook do
       {:ok, nil} ->
         nil
 
-      {:ok, wallets} ->
-        wallets
+      {:ok, registry} ->
+        registry.wallets
     end
   end
 
