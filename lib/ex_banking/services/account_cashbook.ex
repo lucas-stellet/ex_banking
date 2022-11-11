@@ -1,47 +1,49 @@
 defmodule ExBanking.Services.AccountCashbook do
   @moduledoc false
 
+  alias ExBanking.Core.Wallet
+
   @cache_name :account_cashbook
 
   @type t :: %__MODULE__{
-          balance: Decimal.t(),
+          wallets: list(Wallet.t()),
           last_updated_at: DateTime.t()
         }
 
-  defstruct [:balance, :last_updated_at]
+  defstruct [:wallets, :last_updated_at]
 
-  @spec register_last_balance(username :: String.t(), balance :: Decimal.t()) :: :ok
-  def register_last_balance(username, balance) do
+  @spec register_last_wallets(username :: String.t(), wallets :: Decimal.t()) :: :ok
+  def register_last_wallets(username, wallets) do
     Cachex.get_and_update!(@cache_name, username, fn
-      nil -> {:commit, new(balance)}
-      registry -> {:commit, update_balance(registry, balance)}
+      nil -> {:commit, new(wallets)}
+      registry -> {:commit, update_wallets(registry, wallets)}
     end)
 
     :ok
   end
 
-  @spec get_last_balance(username :: String.t()) :: Decimal.t() | nil
-  def get_last_balance(username) do
+  @spec get_last_wallets(username :: String.t()) :: Decimal.t() | nil
+  def get_last_wallets(username) do
     case Cachex.get(@cache_name, username) do
       {:ok, nil} ->
         nil
 
-      {:ok, balance} ->
-        balance
+      {:ok, wallets} ->
+        wallets
     end
   end
 
-  defp new(balance) do
+  defp new(wallets) do
     %__MODULE__{
-      balance: balance,
+      wallets: wallets,
       last_updated_at: DateTime.utc_now()
     }
   end
 
-  defp update_balance(cashbook_registry, new_balance) do
+  defp update_wallets(cashbook_registry, new_wallets) do
     %__MODULE__{
       cashbook_registry
-      | balance: new_balance,
+      | wallets: new_wallets,
         last_updated_at: DateTime.utc_now()
     }
   end
