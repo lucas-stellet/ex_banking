@@ -1,10 +1,33 @@
 defmodule ExBanking do
-  @moduledoc false
+  @moduledoc """
+  ExBanking is application that allows suers to create your accounts and multiple wallets.
+  Each wallet has your own currency.
+  """
 
   alias ExBanking.Core
   alias ExBanking.Operations
   alias ExBanking.Services
 
+  @doc """
+  Creates a new user and an account.
+
+  Is allowed to crate one account for each username, that is case sensitive.
+  In case of attempt an error will be returned.
+
+  ### Parameters
+
+  `user`:  the username and the account identification.
+
+  ### Examples
+
+    ```
+    iex> ExBanking.create_user("johndoe")
+    :ok
+
+    iex> ExBanking.create_user("johndoe")
+    :{:error, :user_already_exists}
+    ```
+  """
   @spec create_user(user :: String.t()) :: :ok | {:error, :wrong_arguments | :user_already_exists}
   def create_user(user) do
     with {:ok, account} <- Core.create_account(user),
@@ -16,6 +39,42 @@ defmodule ExBanking do
     end
   end
 
+  @doc """
+  Makes a deposit from the account wallet with the given currency.
+  Ff not exists, a new one will be created.
+
+  Case positive, the wallet balance will be increased for the amount.
+
+  When the user passed as argument does not exist an error message will be
+  returned. The same happens in case of wrong argument.
+
+  ### Parameters
+
+  `user`:  the username and the account identification.
+
+  `amount`: the amount to be increased from the wallet
+
+  `currency`: te currency of the amount and the wallet
+
+  ### Examples
+
+    ```
+    iex> ExBanking.create_user("johndoe")
+    :ok
+
+    iex> ExBanking.deposit("johndoe", 100.10, "USD")
+    {:ok, 100.10}
+
+    iex> ExBanking.deposit("johndoe", 10, "USD")
+    : {:ok, 110.10}
+
+    iex> ExBanking.deposit("johndoe", 10, "EUR")
+    : {:ok, 10.0}
+
+    iex> ExBanking.deposit("johndoe", 10, "EUR")
+    : {:ok, 10.0}
+    ```
+  """
   @spec deposit(user :: String.t(), amount :: number, currency :: String.t()) ::
           {:ok, new_balance :: number}
           | {:error, :wrong_arguments | :user_does_not_exist | :too_many_requests_to_user}
@@ -32,6 +91,45 @@ defmodule ExBanking do
     end
   end
 
+  @doc """
+  Makes a withdraw from the account wallet with the given currency.
+  If not exists, an error will be returned.
+
+  Case positive, the wallet balance will be decreased..
+
+  When the user passed as argument does not exist an error message will be
+  returned. The same happens in case of wrong argument.
+
+  In case of the given amount would be greater than current wallet balance,
+  an error will be returned too.
+
+  ### Parameters
+
+  `user`:  the username and the account identification.
+
+  `amount`: the amount to be decreased from the wallet
+
+  `currency`: te currency of the amount and wallet
+
+  ### Examples
+
+    ```
+    iex> ExBanking.create_user("johndoe")
+    :ok
+
+    iex> ExBanking.deposit("johndoe", 100.10, "USD")
+    {:ok, 100.10}
+
+    iex> ExBanking.withdraw("johndoe", 10.10, "USD")
+    {:ok, 90.0}
+
+    iex> ExBanking.deposit("johndoe", 100.00, 10)
+    {:error, :wrong_arguments}
+
+    iex> ExBanking.deposit("johndoe", 10, "BRL")
+    {:error, :not_enough_money}
+    ```
+  """
   @spec withdraw(user :: String.t(), amount :: number, currency :: String.t()) ::
           {:ok, new_balance :: number}
           | {:error,
@@ -61,6 +159,36 @@ defmodule ExBanking do
     end
   end
 
+  @doc """
+  Returns the balance from the wallet related to given currency.
+
+  In case of there is no wallet with currency, am error will be returned.
+
+  The same happens in case of wrong argument.
+
+  ### Parameters
+
+  `user`:  the username and the account identification.
+
+  `currency`: te currency of the wallet
+
+  ### Examples
+
+    ```
+    iex> ExBanking.create_user("johndoe")
+    :ok
+
+    iex> ExBanking.deposit("johndoe", 10, "USD")
+    {:ok, 10.0}
+
+    iex> ExBanking.get_balance("johndoe",  "USD")
+    {:ok, 10.0}
+
+    iex>  ExBanking.get_balance("johndoe",  "EUR")
+    {:error, :wrong_arguments}
+    ```
+  """
+
   @spec get_balance(user :: String.t(), currency :: String.t()) ::
           {:ok, balance :: number}
           | {:error, :wrong_arguments | :user_does_not_exist | :too_many_requests_to_user}
@@ -85,6 +213,46 @@ defmodule ExBanking do
         error
     end
   end
+
+  @doc """
+  Sends money from an account to an other.
+
+  If one of them does not exists an error will be returned
+
+  In case of of the sender does not havve sufficient balance to send
+  an error wiell be returned too.
+
+  The same happens if one argument not be valid.
+
+  ### Parameters
+
+  `from_user`:  the username of sender.
+
+  `to_user`:  the username of receiver
+
+  `amount`: the amount to be sent
+
+  `currency`: the currency of the amount or wallet
+
+  ### Examples
+
+    ```
+    iex> ExBanking.create_user("johndoe")
+    :ok
+
+    iex> ExBanking.create_user("mariadoe")
+    :ok
+
+    iex> ExBanking.deposit("johndoe", 10, "USD")
+    {:ok, 10.0}
+
+    iex> ExBanking.send("johndoe", "mariadoe", 10, "USD")
+    {:ok, 0.0, 10.0}
+
+    iex> ExBanking.send("johndoe", "mariadoe", 10, "EUR")
+    {:error, not_enough_money}
+    ```
+  """
 
   @spec send(
           from_user :: String.t(),
