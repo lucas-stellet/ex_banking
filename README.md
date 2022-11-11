@@ -15,3 +15,7 @@ Furthermore, at each new upgrade of wallets, a cache is made in case of `Account
 
 ![Application Tree](/priv/ex_banking.png)
 
+## How to use 
+
+All docs are indicated on [ExBanking](/lib/ex_banking.ex) module.
+
