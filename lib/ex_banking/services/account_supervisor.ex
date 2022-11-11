@@ -1,7 +1,7 @@
 defmodule ExBanking.Services.AccountSupervisor do
   @moduledoc false
 
-  use Supervisor, restart: :temporary
+  use Supervisor, restart: :transient
 
   alias ExBanking.Core.Account
   alias ExBanking.Services.{AccountOperations, AccountServer}
