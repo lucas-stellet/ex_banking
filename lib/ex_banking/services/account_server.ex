@@ -17,10 +17,14 @@ defmodule ExBanking.Services.AccountServer do
       nil ->
         GenServer.start_link(__MODULE__, account, name: via(account.username))
 
+      # coveralls-ignore-start
+
       wallets ->
         GenServer.start_link(__MODULE__, Map.put(account, :wallets, wallets),
           name: via(account.username)
         )
+
+        # coveralls-ignore-stop
     end
   end
 
@@ -91,7 +95,7 @@ defmodule ExBanking.Services.AccountServer do
 
   @impl true
   def handle_info({_pid, :ok}, account) do
-    Logger.info("Account Cashbook registry for #{account.username} update")
+    Logger.debug("Account Cashbook registry for #{account.username} update")
     {:noreply, account}
   end
 

@@ -41,11 +41,6 @@ defmodule ExBanking.Services.AccountOperations do
   end
 
   @impl true
-  def handle_call(:count_running_operations, _from, operations) do
-    {:reply, operations.running, operations}
-  end
-
-  @impl true
   def handle_call({:start_operation, operation}, _from, operations) do
     if Enum.count(operations.running) >= max_operations_per_user() do
       {:reply, :too_many_requests_to_user, operations}

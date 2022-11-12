@@ -13,13 +13,9 @@ defmodule ExBanking.Services do
     if account_service_already_started?(username) do
       {:error, :user_already_exists}
     else
-      case AccountCreator.start_service(account) do
-        {:ok, _pid} ->
-          :ok
+      {:ok, _pid} = AccountCreator.start_service(account)
 
-        {:error, reason} ->
-          Logger.error("Error on AccountCreator service: #{inspect(reason)}")
-      end
+      :ok
     end
   end
 

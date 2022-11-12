@@ -28,8 +28,10 @@ defmodule ExBanking.Services.AccountCashbook do
       {:ok, nil} ->
         nil
 
+      # coveralls-ignore-start
       {:ok, registry} ->
         registry.wallets
+        # coveralls-ignore-stop
     end
   end
 

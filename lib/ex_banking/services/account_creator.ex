@@ -16,8 +16,12 @@ defmodule ExBanking.Services.AccountCreator do
     )
   end
 
+  # coveralls-ignore-start
+
   @impl true
   def init(_init_arg) do
     DynamicSupervisor.init(strategy: :one_for_one)
   end
+
+  # coveralls-ignore-stop
 end
