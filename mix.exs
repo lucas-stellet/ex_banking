@@ -10,7 +10,14 @@ defmodule ExBanking.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -29,7 +36,8 @@ defmodule ExBanking.MixProject do
       {:uuid, "~> 1.1"},
       {:accessible, "~> 0.3.0"},
       {:faker, "~> 0.17", only: :test},
-      {:cachex, "~> 3.4"}
+      {:cachex, "~> 3.4"},
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 
