@@ -24,7 +24,7 @@ defmodule ExBanking.ServicesTest do
       {:ok, user_operation} = Operations.new_deposit(10, "USD")
 
       result =
-        1..15
+        1..20
         |> Task.async_stream(fn _ ->
           case Services.start_operation(user, user_operation) do
             :ok ->
@@ -37,9 +37,9 @@ defmodule ExBanking.ServicesTest do
         end)
         |> Enum.map(fn {_, v} -> v end)
 
-      Enum.count(result, &(&1 == :ok)) |> IO.inspect()
+      assert 5 == Enum.count(result, &(&1 == :ok))
 
-      Enum.count(result, &(&1 == :error)) |> IO.inspect()
+      assert 15 == Enum.count(result, &(&1 == :error))
     end
   end
 
