@@ -25,6 +25,10 @@ defmodule ExBanking do
          :ok <- Operations.finish_operation(user) do
       {:ok, new_balance}
     else
+      {:error, :wrong_arguments} = error ->
+        error
+
+
       {:error, _reason} = error ->
         Operations.finish_operation(user)
         error
@@ -46,6 +50,10 @@ defmodule ExBanking do
          :ok <- Operations.finish_operation(user) do
       {:ok, new_balance}
     else
+
+      {:error, :wrong_arguments} = error ->
+        error
+
       {:error, _reason} = error ->
         Operations.finish_operation(user)
         error
@@ -62,6 +70,10 @@ defmodule ExBanking do
          :ok <- Operations.finish_operation(user) do
       {:ok, balance}
     else
+
+      {:error, :wrong_arguments} = error ->
+        error
+
       {:error, _reason} = error ->
         Operations.finish_operation(user)
         error
@@ -95,6 +107,9 @@ defmodule ExBanking do
 
       {:error, :too_many_requests_to_receiver} = error ->
         Operations.finish_operation(from_user)
+
+      {:error, :wrong_arguments} = error ->
+        error
 
       {:error, _reason} = error ->
         Operations.finish_operation(from_user)
