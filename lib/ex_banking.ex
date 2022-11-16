@@ -92,6 +92,10 @@ defmodule ExBanking do
          :ok <- Operations.finish_operation(to_user) do
       {:ok, sender_balance, receiver_balance}
     else
+
+      {:error, :too_many_requests_to_receiver} = error ->
+        Operations.finish_operation(from_user)
+
       {:error, _reason} = error ->
         Operations.finish_operation(from_user)
         Operations.finish_operation(to_user)
