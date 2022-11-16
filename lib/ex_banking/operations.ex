@@ -1,54 +1,53 @@
 defmodule ExBanking.Operations do
   @moduledoc false
+  use GenServer
 
-  alias ExBanking.Operations.{Balance, Deposit, Transfer, Withdraw}
+  # Public functions
 
-  @type t :: Deposit.t() | Withdraw.t() | Balance.t() | Transfer.t()
-  @spec new_deposit(amount :: number(), currency :: String.t()) ::
-          {:ok, Deposit.t()} | {:error, :wrong_arguments}
-  def new_deposit(amount, currency) do
-    case Deposit.new(amount, currency) do
-      :wrong_arguments ->
-        {:error, :wrong_arguments}
+  @spec start_link(initial_args :: any()) :: GenServer.on_start()
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+  end
 
-      deposit_operation ->
-        {:ok, deposit_operation}
+  @spec start_operation(username :: String.t()) ::
+          :ok | {:error, :too_many_requests_to_user}
+  def start_operation(username) do
+    GenServer.call(__MODULE__, {:start_operation, username})
+  end
+
+  @spec finish_operation(username :: String.t()) ::
+          :ok
+  def finish_operation(username) do
+    GenServer.call(__MODULE__, {:finish_operation, username})
+  end
+
+  # Callback functions
+
+  @impl true
+  def init(initial_state) do
+    {:ok, initial_state}
+  end
+
+  @impl true
+  def handle_call({:start_operation, username}, _from, operations) do
+    current_counter = Map.get(operations, username, 0)
+    new_counter = current_counter + 1
+
+    if current_counter >= max_operations_per_user() do
+      {:reply, {:error, :too_many_requests_to_user}, operations}
+    else
+      {:reply, :ok, Map.put(operations, username, new_counter)}
     end
   end
 
-  @spec new_withdraw(amount :: number(), currency :: String.t()) ::
-          {:ok, Withdraw.t()} | {:error, :wrong_arguments}
-  def new_withdraw(amount, currency) do
-    case Withdraw.new(amount, currency) do
-      :wrong_arguments ->
-        {:error, :wrong_arguments}
-
-      withdraw_operation ->
-        {:ok, withdraw_operation}
-    end
+  @impl true
+  def handle_call({:finish_operation, username}, _from, operations) do
+    {:reply, :ok, Map.update(operations, username, 0, &(&1 - 1))}
   end
 
-  @spec new_transfer(type :: atom(), amount :: number(), currency :: String.t()) ::
-          {:ok, Transfer.t()} | {:error, :wrong_arguments}
-  def new_transfer(type, amount, currency) do
-    case Transfer.new(type, amount, currency) do
-      :wrong_arguments ->
-        {:error, :wrong_arguments}
-
-      transfer_operation ->
-        {:ok, transfer_operation}
-    end
-  end
-
-  @spec new_balance(username :: String.t(), currency :: String.t()) ::
-          {:ok, Balance.t()} | {:error, :wrong_arguments}
-  def new_balance(username, currency) do
-    case Balance.new(username, currency) do
-      :wrong_arguments ->
-        {:error, :wrong_arguments}
-
-      balance_operation ->
-        {:ok, balance_operation}
-    end
+  defp max_operations_per_user do
+    Application.get_env(:ex_banking, :services)[
+      :max_operations_per_user
+    ]
   end
 end

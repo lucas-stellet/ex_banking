@@ -6,10 +6,8 @@ defmodule ExBanking.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Registry, keys: :unique, name: ExBanking.Services.AccountRegistry},
-      {PartitionSupervisor,
-       child_spec: DynamicSupervisor, name: ExBanking.Services.AccountCreators},
-      {Cachex, name: :account_cashbook}
+      {ExBanking.Operations, name: ExBanking.Operations},
+      {Cachex, name: :accounts}
     ]
 
     opts = [strategy: :one_for_one, name: ExBanking.Supervisor]

@@ -1,4 +1,4 @@
-defmodule ExBanking.Core.Wallet do
+defmodule ExBanking.Accounts.Wallet do
   @moduledoc false
 
   alias Decimal, as: D
@@ -20,21 +20,26 @@ defmodule ExBanking.Core.Wallet do
     }
   end
 
-  @spec new(amount :: D.t(), currency :: String.t()) :: t()
+  @spec new(amount :: number(), currency :: String.t()) :: t()
   def new(amount, currency) do
+    {:ok, d_amount} = Decimal.cast(amount)
+
     %__MODULE__{
-      balance: amount,
+      balance: d_amount,
       currency: currency
     }
   end
 
-  @spec increase_wallet_balance(wallet :: t(), amount :: D.t()) :: t()
-  def increase_wallet_balance(wallet, amount),
-    do: update_in(wallet[:balance], &Decimal.add(&1, amount))
+  @spec increase_wallet_balance(wallet :: t(), amount :: number()) :: t()
+  def increase_wallet_balance(wallet, amount) do
+    update_in(wallet[:balance], &Decimal.add(&1, elem(Decimal.cast(amount), 1)))
+  end
 
-  @spec decrease_wallet_balance(wallet :: t(), amount :: D.t()) :: t() | :not_enough_money
+  @spec decrease_wallet_balance(wallet :: t(), amount :: number()) :: t() | :not_enough_money
   def decrease_wallet_balance(wallet, amount) do
-    sub = D.sub(wallet.balance, amount)
+    {:ok, d_amount} = Decimal.cast(amount)
+
+    sub = D.sub(wallet.balance, d_amount)
 
     if D.lt?(sub, Decimal.new(0)) do
       :not_enough_money
