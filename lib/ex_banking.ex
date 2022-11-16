@@ -1,9 +1,8 @@
 defmodule ExBanking do
   @moduledoc false
 
-  alias ExBanking.Operations
   alias ExBanking.Accounts
-  alias ExBanking.Accounts.{Account}
+  alias ExBanking.Operations
 
   @spec create_user(user :: String.t()) :: :ok | {:error, :wrong_arguments | :user_already_exists}
   def create_user(user) do
