@@ -46,7 +46,7 @@ defmodule ExBanking.Operations do
   end
 
   defp max_operations_per_user do
-    Application.get_env(:ex_banking, :services)[
+    Application.get_env(:ex_banking, __MODULE__)[
       :max_operations_per_user
     ]
   end
