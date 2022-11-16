@@ -108,6 +108,8 @@ defmodule ExBanking do
       {:error, :too_many_requests_to_receiver} = error ->
         Operations.finish_operation(from_user)
 
+        error
+
       {:error, :wrong_arguments} = error ->
         error
 
