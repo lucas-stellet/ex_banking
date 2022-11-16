@@ -4,16 +4,15 @@ defmodule ExBanking.ServicesTest do
   use ExUnit.Case, async: true
 
   alias ExBanking.Operations
-  alias ExBanking.Services
 
   describe "start_operation/2" do
     setup do
-      initial_config = Application.get_env(:ex_banking, :services)[:max_operations_per_user]
+      initial_config = Application.get_env(:ex_banking, Operations)[:max_operations_per_user]
 
-      Application.put_env(:ex_banking, :services, max_operations_per_user: 5)
+      Application.put_env(:ex_banking, Operations, max_operations_per_user: 5)
 
       on_exit(fn ->
-        Application.put_env(:ex_banking, :services, max_operations_per_user: initial_config)
+        Application.put_env(:ex_banking, Operations, max_operations_per_user: initial_config)
       end)
     end
 
@@ -21,20 +20,21 @@ defmodule ExBanking.ServicesTest do
     test "should start a operation (with a random delay between 2 and 4 milliSeconds) olny if the limit of 5 has not been reached" do
       [user, _] = fixture()
 
-      {:ok, user_operation} = Operations.new_deposit(10, "USD")
-
       result =
         1..20
-        |> Task.async_stream(fn _ ->
-          case Services.start_operation(user, user_operation) do
-            :ok ->
-              random_delay(4)
-              Services.finish_operation(user, user_operation)
+        |> Task.async_stream(
+          fn _ ->
+            case Operations.start_operation(user) do
+              :ok ->
+                random_delay(4)
+                Operations.finish_operation(user)
 
-            {:error, :too_many_requests_to_user} ->
-              :error
-          end
-        end)
+              {:error, :too_many_requests_to_user} ->
+                :error
+            end
+          end,
+          timeout: :infinity
+        )
         |> Enum.map(fn {_, v} -> v end)
 
       assert 5 == Enum.count(result, &(&1 == :ok))
